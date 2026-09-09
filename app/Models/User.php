@@ -29,4 +29,21 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * List yang dibuat dan dimiliki oleh user ini.
+     */
+    public function ownedLists(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TodoList::class, 'user_id');
+    }
+
+    /**
+     * List di mana user ini terdaftar sebagai anggota kolaborator.
+     */
+    public function memberLists(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(TodoList::class, 'list_user', 'user_id', 'list_id')
+                    ->withTimestamps();
+    }
 }
