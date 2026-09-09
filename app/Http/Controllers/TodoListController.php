@@ -84,4 +84,42 @@ class TodoListController extends Controller
 
         return view('lists.show', compact('list', 'isOwner', 'isMember'));
     }
+
+    /**
+     * Menampilkan form edit list.
+     */
+    public function edit(TodoList $list)
+    {
+        return view('lists.edit', compact('list'));
+    }
+
+    /**
+     * Memperbarui informasi list di database.
+     */
+    public function update(Request $request, TodoList $list)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        $list->update([
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        return redirect()->route('lists.show', $list)
+            ->with('success', 'Informasi list berhasil diperbarui!');
+    }
+
+    /**
+     * Menghapus list dari database.
+     */
+    public function destroy(TodoList $list)
+    {
+        $list->delete();
+
+        return redirect()->route('lists.index')
+            ->with('success', 'List berhasil dihapus!');
+    }
 }
