@@ -13,6 +13,13 @@ class ListMemberController extends Controller
      */
     public function store(Request $request, TodoList $list)
     {
+        $currentUser = auth()->user() ?? User::first();
+
+        // Otorisasi: Hanya Owner yang dapat menambah anggota ke list
+        if ($currentUser && ! $list->isOwner($currentUser)) {
+            abort(403, 'Hanya pemilik (owner) yang dapat menambahkan anggota ke list ini.');
+        }
+
         $validated = $request->validate([
             'email' => 'required|email|exists:users,email',
         ], [
@@ -46,6 +53,13 @@ class ListMemberController extends Controller
      */
     public function destroy(TodoList $list, User $user)
     {
+        $currentUser = auth()->user() ?? User::first();
+
+        // Otorisasi: Hanya Owner yang dapat mengeluarkan anggota dari list
+        if ($currentUser && ! $list->isOwner($currentUser)) {
+            abort(403, 'Hanya pemilik (owner) yang dapat mengeluarkan anggota dari list ini.');
+        }
+
         // Cegah pengeluaran jika user yang dituju adalah owner
         if ($list->isOwner($user)) {
             return redirect()->route('lists.show', $list)

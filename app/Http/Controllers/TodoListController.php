@@ -76,9 +76,15 @@ class TodoListController extends Controller
      */
     public function show(TodoList $list)
     {
+        $currentUser = auth()->user() ?? User::first();
+
+        // Otorisasi: Hanya Owner dan Anggota yang berhak melihat detail list
+        if ($currentUser && ! $list->hasAccess($currentUser)) {
+            abort(403, 'Anda tidak memiliki hak akses untuk melihat list ini.');
+        }
+
         $list->load(['owner', 'members']);
 
-        $currentUser = auth()->user() ?? User::first();
         $isOwner = $currentUser ? $list->isOwner($currentUser) : true;
         $isMember = $currentUser ? $list->isMember($currentUser) : false;
 
@@ -90,6 +96,13 @@ class TodoListController extends Controller
      */
     public function edit(TodoList $list)
     {
+        $currentUser = auth()->user() ?? User::first();
+
+        // Otorisasi: Hanya Owner yang dapat mengedit list
+        if ($currentUser && ! $list->isOwner($currentUser)) {
+            abort(403, 'Hanya pemilik (owner) yang memiliki hak akses untuk mengedit list ini.');
+        }
+
         return view('lists.edit', compact('list'));
     }
 
@@ -98,6 +111,13 @@ class TodoListController extends Controller
      */
     public function update(Request $request, TodoList $list)
     {
+        $currentUser = auth()->user() ?? User::first();
+
+        // Otorisasi: Hanya Owner yang dapat memperbarui list
+        if ($currentUser && ! $list->isOwner($currentUser)) {
+            abort(403, 'Hanya pemilik (owner) yang memiliki hak akses untuk memperbarui list ini.');
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -117,6 +137,13 @@ class TodoListController extends Controller
      */
     public function destroy(TodoList $list)
     {
+        $currentUser = auth()->user() ?? User::first();
+
+        // Otorisasi: Hanya Owner yang dapat menghapus list
+        if ($currentUser && ! $list->isOwner($currentUser)) {
+            abort(403, 'Hanya pemilik (owner) yang memiliki hak akses untuk menghapus list ini.');
+        }
+
         $list->delete();
 
         return redirect()->route('lists.index')
