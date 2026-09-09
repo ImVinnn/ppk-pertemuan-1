@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ListMemberController;
 use App\Http\Controllers\TodoListController;
@@ -26,6 +27,15 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
+
+    // Hanya untuk admin
+    Route::middleware('admin')
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function () {
+            Route::get('/users', [UserController::class, 'index'])
+                ->name('users.index');
+        });
 
     Route::resource('lists', TodoListController::class);
 
