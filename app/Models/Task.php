@@ -25,7 +25,7 @@ class Task extends Model
 
     public function list()
     {
-        return $this->belongsTo(TaskList::class, 'list_id');
+        $relatedClass = class_exists(TodoList::class) ? TodoList::class : TaskList::class;
+        return $this->belongsTo($relatedClass, 'list_id');
     }
 }
-

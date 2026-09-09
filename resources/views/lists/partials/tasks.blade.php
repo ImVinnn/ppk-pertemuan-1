@@ -1,4 +1,5 @@
 @php
+    $tasks = isset($tasks) ? $tasks : (isset($list) ? \App\Models\Task::where('list_id', $list->id)->get() : collect());
     $totalTasks = $tasks->count();
     $completedTasks = $tasks->where('is_done', true)->count();
     $percentage = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
