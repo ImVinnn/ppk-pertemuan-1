@@ -8,6 +8,14 @@
 <body>
     <h1>Daftar User</h1>
 
+            @if (session('success'))
+            <p>{{ session('success') }}</p>
+        @endif
+
+        <p>
+            <a href="{{ route('admin.users.create') }}">Tambah Akun User</a>
+        </p>
+
     <p>Login sebagai: {{ auth()->user()->name }}</p>
 
     <table border="1" cellpadding="8">
