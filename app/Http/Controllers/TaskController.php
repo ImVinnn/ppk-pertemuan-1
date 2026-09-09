@@ -3,15 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Models\TodoList;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
     /**
+     * Pastikan user yang login adalah owner atau anggota list terkait.
+     */
+    private function authorizeList(Request $request, TodoList $list): void
+    {
+        abort_unless($list->hasAccess($request->user()), 403, 'Anda tidak memiliki akses ke list ini.');
+    }
+
+    /**
      * Menampilkan form tambah task untuk sebuah list.
      */
-    public function create($list)
+    public function create(Request $request, TodoList $list)
     {
+        $this->authorizeList($request, $list);
+
         return view('tasks.create', [
             'list' => $list,
         ]);
@@ -20,8 +31,10 @@ class TaskController extends Controller
     /**
      * Menyimpan task baru ke dalam list.
      */
-    public function store(Request $request, $list)
+    public function store(Request $request, TodoList $list)
     {
+        $this->authorizeList($request, $list);
+
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -29,10 +42,7 @@ class TaskController extends Controller
             'due_date'    => 'nullable|date',
         ]);
 
-        $listId = is_object($list) ? $list->id : $list;
-
-        Task::create([
-            'list_id'     => $listId,
+        $list->tasks()->create([
             'title'       => $validated['title'],
             'description' => $validated['description'] ?? null,
             'priority'    => $validated['priority'],
@@ -40,14 +50,16 @@ class TaskController extends Controller
             'is_done'     => false,
         ]);
 
-        return redirect()->route('lists.show', $listId)->with('success', 'Tugas berhasil ditambahkan.');
+        return redirect()->route('lists.show', $list)->with('success', 'Tugas berhasil ditambahkan.');
     }
 
     /**
      * Menampilkan form edit task.
      */
-    public function edit(Task $task)
+    public function edit(Request $request, Task $task)
     {
+        $this->authorizeList($request, $task->list);
+
         return view('tasks.edit', [
             'task' => $task,
         ]);
@@ -58,6 +70,8 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
+        $this->authorizeList($request, $task->list);
+
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -78,8 +92,10 @@ class TaskController extends Controller
     /**
      * Menghapus task dari database.
      */
-    public function destroy(Task $task)
+    public function destroy(Request $request, Task $task)
     {
+        $this->authorizeList($request, $task->list);
+
         $listId = $task->list_id;
         $task->delete();
 
@@ -89,10 +105,12 @@ class TaskController extends Controller
     /**
      * Toggle status selesai (is_done) sebuah task.
      */
-    public function toggle(Task $task)
+    public function toggle(Request $request, Task $task)
     {
+        $this->authorizeList($request, $task->list);
+
         $task->update([
-            'is_done' => !$task->is_done,
+            'is_done' => ! $task->is_done,
         ]);
 
         return back()->with('success', 'Status tugas berhasil diperbarui.');

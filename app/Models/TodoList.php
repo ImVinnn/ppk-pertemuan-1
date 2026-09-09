@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TodoList extends Model
 {
@@ -30,6 +31,14 @@ class TodoList extends Model
     {
         return $this->belongsToMany(User::class, 'list_user', 'list_id', 'user_id')
                     ->withTimestamps();
+    }
+
+    /**
+     * Semua tugas (task) di dalam list ini.
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'list_id');
     }
 
     /**

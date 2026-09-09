@@ -13,11 +13,22 @@
             <a href="{{ route('lists.index') }}" class="text-xl font-bold tracking-wide">
                 📝 JARA Todo List
             </a>
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-4 text-sm">
                 <a href="{{ route('lists.index') }}" class="hover:underline">Daftar List</a>
-                <a href="{{ route('lists.create') }}" class="bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-md text-sm font-medium transition">
+                <a href="{{ route('lists.create') }}" class="bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-md font-medium transition">
                     + Buat List Baru
                 </a>
+                @auth
+                    @if(auth()->user()->role === 'admin')
+                        <a href="{{ route('admin.users.index') }}" class="hover:underline">Kelola User</a>
+                    @endif
+                    <span class="text-indigo-200">|</span>
+                    <span class="text-indigo-100">{{ auth()->user()->name }}</span>
+                    <form action="{{ route('logout') }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="hover:underline text-indigo-100">Logout</button>
+                    </form>
+                @endauth
             </div>
         </div>
     </header>

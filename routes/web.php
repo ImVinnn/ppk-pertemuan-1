@@ -48,6 +48,9 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('lists', TodoListController::class);
 
+    // Route modul Task (butuh login, di-load di sini agar ikut middleware auth)
+    require __DIR__.'/task.php';
+
     // Pengelolaan anggota kolaborator list
     Route::post(
         'lists/{list}/members',

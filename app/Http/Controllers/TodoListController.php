@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\TodoList;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class TodoListController extends Controller
@@ -11,28 +10,21 @@ class TodoListController extends Controller
     /**
      * Menampilkan daftar list pribadi dan list kolaborasi tim.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $currentUser = auth()->user() ?? User::first();
+        $currentUser = $request->user();
 
-        if (! $currentUser) {
-            $ownedLists = collect();
-            $collaboratedLists = collect();
-        } else {
-            // List milik sendiri
-            $ownedLists = TodoList::where('user_id', $currentUser->id)
-                ->with(['owner', 'members'])
-                ->latest()
-                ->get();
-
-            // List di mana user ini adalah anggota tim
-            $collaboratedLists = TodoList::whereHas('members', function ($query) use ($currentUser) {
-                $query->where('users.id', $currentUser->id);
-            })
+        $ownedLists = TodoList::where('user_id', $currentUser->id)
             ->with(['owner', 'members'])
             ->latest()
             ->get();
-        }
+
+        $collaboratedLists = TodoList::whereHas('members', function ($query) use ($currentUser) {
+            $query->where('users.id', $currentUser->id);
+        })
+        ->with(['owner', 'members'])
+        ->latest()
+        ->get();
 
         return view('lists.index', compact('ownedLists', 'collaboratedLists'));
     }
@@ -55,14 +47,8 @@ class TodoListController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        // Gunakan user yang login, atau fallback ke user pertama untuk kebutuhan demo
-        $user = auth()->user() ?? User::firstOrCreate(
-            ['email' => 'demo@example.com'],
-            ['name' => 'Demo User', 'password' => bcrypt('password')]
-        );
-
         $list = TodoList::create([
-            'user_id' => $user->id,
+            'user_id' => $request->user()->id,
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
         ]);
@@ -74,19 +60,15 @@ class TodoListController extends Controller
     /**
      * Menampilkan detail dari suatu list beserta anggotanya.
      */
-    public function show(TodoList $list)
+    public function show(Request $request, TodoList $list)
     {
-        $currentUser = auth()->user() ?? User::first();
-
         // Otorisasi: Hanya Owner dan Anggota yang berhak melihat detail list
-        if ($currentUser && ! $list->hasAccess($currentUser)) {
-            abort(403, 'Anda tidak memiliki hak akses untuk melihat list ini.');
-        }
+        abort_unless($list->hasAccess($request->user()), 403, 'Anda tidak memiliki hak akses untuk melihat list ini.');
 
-        $list->load(['owner', 'members']);
+        $list->load(['owner', 'members', 'tasks']);
 
-        $isOwner = $currentUser ? $list->isOwner($currentUser) : true;
-        $isMember = $currentUser ? $list->isMember($currentUser) : false;
+        $isOwner = $list->isOwner($request->user());
+        $isMember = $list->isMember($request->user());
 
         return view('lists.show', compact('list', 'isOwner', 'isMember'));
     }
@@ -94,14 +76,9 @@ class TodoListController extends Controller
     /**
      * Menampilkan form edit list.
      */
-    public function edit(TodoList $list)
+    public function edit(Request $request, TodoList $list)
     {
-        $currentUser = auth()->user() ?? User::first();
-
-        // Otorisasi: Hanya Owner yang dapat mengedit list
-        if ($currentUser && ! $list->isOwner($currentUser)) {
-            abort(403, 'Hanya pemilik (owner) yang memiliki hak akses untuk mengedit list ini.');
-        }
+        abort_unless($list->isOwner($request->user()), 403, 'Hanya pemilik (owner) yang dapat mengedit list ini.');
 
         return view('lists.edit', compact('list'));
     }
@@ -111,12 +88,7 @@ class TodoListController extends Controller
      */
     public function update(Request $request, TodoList $list)
     {
-        $currentUser = auth()->user() ?? User::first();
-
-        // Otorisasi: Hanya Owner yang dapat memperbarui list
-        if ($currentUser && ! $list->isOwner($currentUser)) {
-            abort(403, 'Hanya pemilik (owner) yang memiliki hak akses untuk memperbarui list ini.');
-        }
+        abort_unless($list->isOwner($request->user()), 403, 'Hanya pemilik (owner) yang dapat memperbarui list ini.');
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -135,14 +107,9 @@ class TodoListController extends Controller
     /**
      * Menghapus list dari database.
      */
-    public function destroy(TodoList $list)
+    public function destroy(Request $request, TodoList $list)
     {
-        $currentUser = auth()->user() ?? User::first();
-
-        // Otorisasi: Hanya Owner yang dapat menghapus list
-        if ($currentUser && ! $list->isOwner($currentUser)) {
-            abort(403, 'Hanya pemilik (owner) yang memiliki hak akses untuk menghapus list ini.');
-        }
+        abort_unless($list->isOwner($request->user()), 403, 'Hanya pemilik (owner) yang dapat menghapus list ini.');
 
         $list->delete();
 

@@ -45,33 +45,13 @@
         <p class="text-gray-600 text-sm">
             {{ $list->description ?? 'Tidak ada deskripsi pada list ini.' }}
         </p>
-
-        <!-- Monitoring Progres Penyelesaian Tugas (User Requirement PPK) -->
-        <div class="pt-4 border-t border-gray-100 space-y-2">
-            <div class="flex items-center justify-between text-xs font-semibold text-gray-600">
-                <span>Progres Penyelesaian Tugas</span>
-                <span>0% (0 / 0 Selesai)</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 0%"></div>
-            </div>
-        </div>
     </div>
 
     <!-- Grid Informasi Anggota & Tugas -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Kolom Kiri (2 Kolom): Tempat Tugas (Modul Task Dev) -->
+        <!-- Kolom Kiri (2 Kolom): Modul Task -->
         <div class="lg:col-span-2 space-y-4">
-            <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-bold text-gray-800">Daftar Tugas</h2>
-                    <span class="text-xs text-gray-400">Dikelola oleh tim / modul Task</span>
-                </div>
-                
-                <div class="border border-dashed border-gray-200 rounded-lg p-8 text-center text-gray-400 text-sm">
-                    <p>📌 Belum ada tugas yang ditambahkan pada list ini.</p>
-                </div>
-            </div>
+            @include('lists.partials.tasks', ['tasks' => $list->tasks])
         </div>
 
         <!-- Kolom Kanan (1 Kolom): Pemilik & Anggota Tim -->

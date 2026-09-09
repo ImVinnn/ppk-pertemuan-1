@@ -9,12 +9,20 @@ class ExampleTest extends TestCase
 {
     use RefreshDatabase;
     /**
-     * A basic test example.
+     * Tamu (belum login) diarahkan ke halaman login.
      */
-    public function test_the_application_returns_a_successful_response(): void
+    public function test_guest_is_redirected_to_login(): void
     {
-        $response = $this->get('/lists');
+        $this->get('/lists')->assertRedirect('/login');
+    }
 
-        $response->assertStatus(200);
+    /**
+     * User yang sudah login dapat membuka daftar list.
+     */
+    public function test_authenticated_user_can_view_lists(): void
+    {
+        $user = \App\Models\User::factory()->create();
+
+        $this->actingAs($user)->get('/lists')->assertStatus(200);
     }
 }
