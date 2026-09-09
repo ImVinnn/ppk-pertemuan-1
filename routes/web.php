@@ -41,6 +41,9 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/users', [UserController::class, 'store'])
             ->name('users.store');
+
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])
+            ->name('users.destroy');
     });
 
     Route::resource('lists', TodoListController::class);

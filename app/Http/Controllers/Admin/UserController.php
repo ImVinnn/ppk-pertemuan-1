@@ -30,9 +30,22 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', Rule::in(['admin', 'user'])],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                'unique:users,email',
+            ],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+            ],
+            'role' => [
+                'required',
+                Rule::in(['admin', 'user']),
+            ],
         ]);
 
         $user = new User();
@@ -45,5 +58,25 @@ class UserController extends Controller
         return redirect()
             ->route('admin.users.index')
             ->with('success', 'Akun user berhasil ditambahkan.');
+    }
+
+    public function destroy(
+        Request $request,
+        User $user
+    ): RedirectResponse {
+        if ($request->user()->is($user)) {
+            return redirect()
+                ->route('admin.users.index')
+                ->with(
+                    'error',
+                    'Admin tidak dapat menghapus akunnya sendiri.'
+                );
+        }
+
+        $user->delete();
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', 'Akun user berhasil dihapus.');
     }
 }
