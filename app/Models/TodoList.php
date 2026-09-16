@@ -14,7 +14,31 @@ class TodoList extends Model
         'user_id',
         'title',
         'description',
+        'name',
+        'owner_id',
     ];
+
+    // Accessor & Mutator untuk 'name' agar kompatibel dengan spesifikasi TaskList
+    public function getNameAttribute(): ?string
+    {
+        return $this->attributes['title'] ?? null;
+    }
+
+    public function setNameAttribute(?string $value): void
+    {
+        $this->attributes['title'] = $value;
+    }
+
+    // Accessor & Mutator untuk 'owner_id' agar kompatibel dengan spesifikasi TaskList
+    public function getOwnerIdAttribute(): ?int
+    {
+        return isset($this->attributes['user_id']) ? (int) $this->attributes['user_id'] : null;
+    }
+
+    public function setOwnerIdAttribute(?int $value): void
+    {
+        $this->attributes['user_id'] = $value;
+    }
 
     /**
      * Pemilik (Owner) dari list.
@@ -30,6 +54,7 @@ class TodoList extends Model
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'list_user', 'list_id', 'user_id')
+                    ->withPivot('role')
                     ->withTimestamps();
     }
 
