@@ -7,5 +7,5 @@ namespace App\Models;
  */
 class TaskList extends TodoList
 {
-    // Mewarisi seluruh konfigurasi tabel, fillable, dan relasi dari TodoList
+    protected $table = 'todo_lists';
 }
