@@ -46,19 +46,9 @@ Route::middleware('auth')->group(function () {
             ->name('users.destroy');
     });
 
-    Route::resource('lists', TodoListController::class);
+    // Route modul List & Anggota (SRS-03 & SRS-04)
+    require __DIR__.'/list.php';
 
-    // Route modul Task (butuh login, di-load di sini agar ikut middleware auth)
+    // Route modul Task (SRS-06 & SRS-07)
     require __DIR__.'/task.php';
-
-    // Pengelolaan anggota kolaborator list
-    Route::post(
-        'lists/{list}/members',
-        [ListMemberController::class, 'store']
-    )->name('lists.members.store');
-
-    Route::delete(
-        'lists/{list}/members/{user}',
-        [ListMemberController::class, 'destroy']
-    )->name('lists.members.destroy');
 });
