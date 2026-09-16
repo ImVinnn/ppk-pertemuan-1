@@ -62,7 +62,7 @@
     @if($filteredTasks->isEmpty())
         <div class="border border-dashed border-gray-200 rounded-lg p-8 text-center text-gray-400 text-sm">
             @if($totalTasks === 0)
-                📌 Belum ada tugas di daftar ini. Klik <strong>+ Tambah Tugas</strong> untuk menambahkan.
+                Belum ada tugas di daftar ini. Klik <strong>+ Tambah Tugas</strong> untuk menambahkan.
             @else
                 Tidak ada tugas yang sesuai dengan filter yang dipilih.
             @endif
@@ -81,7 +81,7 @@
                             @method('PATCH')
                             <button type="submit" title="{{ $task->is_done ? 'Tandai belum selesai' : 'Tandai selesai' }}"
                                 class="text-[11px] font-bold px-2 py-1 rounded-full {{ $task->is_done ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
-                                {{ $task->is_done ? '✓ Selesai' : '○ Belum' }}
+                                {{ $task->is_done ? 'Selesai' : 'Belum' }}
                             </button>
                         </form>
 
@@ -103,7 +103,7 @@
                                 <span class="font-semibold px-2 py-0.5 rounded {{ $prio[1] }}">{{ $prio[0] }}</span>
                                 @if($task->due_date)
                                     <span class="{{ $isOverdue ? 'font-semibold text-red-600' : 'text-gray-400' }}">
-                                        {{ $isOverdue ? '⚠️ Terlewat: ' : '📅 Tenggat: ' }}{{ \Carbon\Carbon::parse($task->due_date)->format('d M Y') }}
+                                        {{ $isOverdue ? 'Terlewat: ' : 'Tenggat: ' }}{{ \Carbon\Carbon::parse($task->due_date)->format('d M Y') }}
                                     </span>
                                 @endif
                             </div>
